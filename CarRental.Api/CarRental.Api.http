@@ -1,0 +1,97 @@
+@host = http://localhost:5259
+
+### Users
+GET {{host}}/api/users
+Accept: application/json
+
+###
+
+GET {{host}}/api/users/1
+Accept: application/json
+
+###
+
+POST {{host}}/api/users
+Content-Type: application/json
+
+{
+  "username": "Maria Lopez",
+  "email": "maria.lopez@example.com"
+}
+
+### Cars
+GET {{host}}/api/cars
+Accept: application/json
+
+###
+
+GET {{host}}/api/cars/1
+Accept: application/json
+
+###
+
+# Valid: the car is no more than 5 years old
+POST {{host}}/api/cars
+Content-Type: application/json
+
+{
+  "brand": "Mercedes-Benz",
+  "model": "C 200",
+  "price": 60,
+  "year": 2024
+}
+
+###
+
+# Invalid (400): the car is older than 5 years
+POST {{host}}/api/cars
+Content-Type: application/json
+
+{
+  "brand": "BMW",
+  "model": "M3",
+  "price": 60.00,
+  "year": 2015
+}
+
+###
+
+PUT {{host}}/api/cars/1
+Content-Type: application/json
+
+{
+  "id": 1,
+  "brand": "Toyota",
+  "model": "Corolla",
+  "price": 55.00,
+  "year": 2025
+}
+
+###
+
+DELETE {{host}}/api/cars/1
+
+### Rentals
+# Valid: returns the rental id and total price (days x daily price)
+POST {{host}}/api/rentals
+Content-Type: application/json
+
+{
+  "userId": 1,
+  "carId": 2,
+  "startDate": "2027-01-10T10:00:00",
+  "endDate": "2027-01-14T10:00:00"
+}
+
+###
+
+# Conflict (409): overlaps the rental above
+POST {{host}}/api/rentals
+Content-Type: application/json
+
+{
+  "userId": 2,
+  "carId": 2,
+  "startDate": "2027-01-12T10:00:00",
+  "endDate": "2027-01-16T10:00:00"
+}

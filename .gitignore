@@ -1,0 +1,18 @@
+## .NET
+bin/
+obj/
+*.user
+*.suo
+.vs/
+.vscode/
+.idea/
+*.log
+TestResults/
+
+## Local config / secrets (use appsettings.example.json as a template)
+appsettings.Development.json
+appsettings.Local.json
+appsettings.*.local.json
+secrets.json
+.env
+*.env
