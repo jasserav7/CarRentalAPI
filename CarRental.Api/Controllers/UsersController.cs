@@ -11,10 +11,12 @@ namespace CarRental.Api.Controllers
     public class UsersController : ControllerBase
     {
         private readonly IUserService _userService;
+        private readonly IRentalService _rentalService;
 
-        public UsersController(IUserService userService)
+        public UsersController(IUserService userService, IRentalService rentalService)
         {
             _userService = userService;
+            _rentalService = rentalService;
         }
 
         // GET: api/users
@@ -42,6 +44,17 @@ namespace CarRental.Api.Controllers
         {
             var createdUser = await _userService.CreateUserAsync(userDto);
             return CreatedAtAction(nameof(GetUser), new { id = createdUser.Id }, createdUser);
+        }
+
+        // GET: api/users/5/rentals
+        [HttpGet("{id}/rentals")]
+        public async Task<ActionResult<IEnumerable<RentalDetailDto>>> GetUserRentals(int id)
+        {
+            if (await _userService.GetUserAsync(id) == null)
+                return NotFound();
+
+            var rentals = await _rentalService.GetRentalsAsync(id, null, null, null);
+            return rentals;
         }
 
         // PUT: api/users/5

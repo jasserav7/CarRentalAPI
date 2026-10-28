@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using CarRental.Api.Dto;
 
@@ -20,5 +22,9 @@ namespace CarRental.Api.Services
     public interface IRentalService
     {
         Task<RentalResult> CreateRentalAsync(RentalDto rentalDto);
+
+        // from/to keep the rentals that overlap that window
+        Task<List<RentalDetailDto>> GetRentalsAsync(int? userId, int? carId, DateTime? from, DateTime? to);
+        Task<RentalDetailDto?> GetRentalAsync(int id);
     }
 }
