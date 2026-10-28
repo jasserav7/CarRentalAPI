@@ -19,6 +19,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 
 builder.Services.AddScoped<ICarService, CarService>();
 builder.Services.AddScoped<IRentalService, RentalService>();
+builder.Services.AddScoped<IUserService, UserService>();
 
 var app = builder.Build();
 app.Initialize(); // Inicializa los datos de prueba

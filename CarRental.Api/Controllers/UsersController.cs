@@ -1,11 +1,8 @@
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
-using CarRental.Api.Data;
 using CarRental.Api.Dto;
-using CarRental.Api.Models;
+using CarRental.Api.Services;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace CarRental.Api.Controllers
 {
@@ -13,54 +10,67 @@ namespace CarRental.Api.Controllers
     [Route("api/[controller]")]
     public class UsersController : ControllerBase
     {
-        private readonly AppDbContext _context;
+        private readonly IUserService _userService;
 
-        public UsersController(AppDbContext context)
+        public UsersController(IUserService userService)
         {
-            _context = context;
+            _userService = userService;
         }
-
-        private UserDto ToDto(User user) =>
-            new UserDto
-            {
-                Id = user.Id,
-                Username = user.Username,
-                Email = user.Email,
-            };
 
         // GET: api/users
         [HttpGet]
         public async Task<ActionResult<IEnumerable<UserDto>>> GetUsers()
         {
-            var users = await _context.Users.ToListAsync();
-            return users.Select(ToDto).ToList();
+            var users = await _userService.GetUsersAsync();
+            return users;
         }
 
         // GET: api/users/5
         [HttpGet("{id}")]
         public async Task<ActionResult<UserDto>> GetUser(int id)
         {
-            var user = await _context.Users.FindAsync(id);
+            var user = await _userService.GetUserAsync(id);
             if (user == null)
                 return NotFound();
 
-            return ToDto(user);
+            return user;
         }
 
         // POST: api/users
         [HttpPost]
         public async Task<ActionResult<UserDto>> CreateUser(UserDto userDto)
         {
-            var user = new User
-            {
-                Username = userDto.Username,
-                Email = userDto.Email,
-            };
-            _context.Users.Add(user);
-            await _context.SaveChangesAsync();
+            var createdUser = await _userService.CreateUserAsync(userDto);
+            return CreatedAtAction(nameof(GetUser), new { id = createdUser.Id }, createdUser);
+        }
 
-            userDto.Id = user.Id;
-            return CreatedAtAction(nameof(GetUser), new { id = user.Id }, userDto);
+        // PUT: api/users/5
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateUser(int id, UserDto userDto)
+        {
+            if (id != userDto.Id)
+                return BadRequest();
+
+            var updated = await _userService.UpdateUserAsync(id, userDto);
+            if (!updated)
+                return NotFound();
+
+            return NoContent();
+        }
+
+        // DELETE: api/users/5
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteUser(int id)
+        {
+            var result = await _userService.DeleteUserAsync(id);
+
+            return result switch
+            {
+                DeleteUserResult.Deleted => NoContent(),
+                DeleteUserResult.NotFound => NotFound(),
+                DeleteUserResult.HasRentals => Conflict("The user has rentals and cannot be deleted."),
+                _ => StatusCode(500),
+            };
         }
     }
 }
