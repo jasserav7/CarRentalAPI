@@ -1,5 +1,6 @@
 using CarRental.Api;
 using CarRental.Api.Data;
+using CarRental.Api.Services;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -15,6 +16,9 @@ var connectionString = builder.Configuration.GetConnectionString("Database")
         "Missing connection string 'Database'. Copy appsettings.example.json to appsettings.Development.json and set your values.");
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(connectionString));
+
+builder.Services.AddScoped<ICarService, CarService>();
+builder.Services.AddScoped<IRentalService, RentalService>();
 
 var app = builder.Build();
 app.Initialize(); // Inicializa los datos de prueba
