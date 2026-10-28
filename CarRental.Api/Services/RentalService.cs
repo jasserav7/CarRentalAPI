@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using CarRental.Api.Data;
@@ -59,6 +61,56 @@ namespace CarRental.Api.Services
             await _context.SaveChangesAsync();
 
             return new RentalResult(RentalError.None, RentalId: rental.Id, TotalPrice: totalPrice);
+        }
+
+        public async Task<List<RentalDetailDto>> GetRentalsAsync(int? userId, int? carId, DateTime? from, DateTime? to)
+        {
+            var query = _context.Rentals.AsNoTracking().AsQueryable();
+
+            if (userId.HasValue)
+                query = query.Where(r => r.UserId == userId.Value);
+            if (carId.HasValue)
+                query = query.Where(r => r.CarId == carId.Value);
+            if (from.HasValue)
+                query = query.Where(r => r.EndDate > from.Value);
+            if (to.HasValue)
+                query = query.Where(r => r.StartDate < to.Value);
+
+            return await query
+                .OrderBy(r => r.StartDate)
+                .Select(r => new RentalDetailDto
+                {
+                    Id = r.Id,
+                    UserId = r.UserId,
+                    Username = r.User.Username,
+                    CarId = r.CarId,
+                    CarBrand = r.Car.Brand,
+                    CarModel = r.Car.Model,
+                    StartDate = r.StartDate,
+                    EndDate = r.EndDate,
+                    TotalPrice = r.Price,
+                })
+                .ToListAsync();
+        }
+
+        public async Task<RentalDetailDto?> GetRentalAsync(int id)
+        {
+            return await _context.Rentals
+                .AsNoTracking()
+                .Where(r => r.Id == id)
+                .Select(r => new RentalDetailDto
+                {
+                    Id = r.Id,
+                    UserId = r.UserId,
+                    Username = r.User.Username,
+                    CarId = r.CarId,
+                    CarBrand = r.Car.Brand,
+                    CarModel = r.Car.Model,
+                    StartDate = r.StartDate,
+                    EndDate = r.EndDate,
+                    TotalPrice = r.Price,
+                })
+                .FirstOrDefaultAsync();
         }
     }
 }

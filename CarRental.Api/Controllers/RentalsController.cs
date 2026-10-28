@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using CarRental.Api.Dto;
 using CarRental.Api.Services;
@@ -14,6 +16,29 @@ namespace CarRental.Api.Controllers
         public RentalsController(IRentalService rentalService)
         {
             _rentalService = rentalService;
+        }
+
+        // GET: api/rentals?userId=1&carId=2&from=2027-01-01&to=2027-02-01
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<RentalDetailDto>>> GetRentals(
+            [FromQuery] int? userId, [FromQuery] int? carId, [FromQuery] DateTime? from, [FromQuery] DateTime? to)
+        {
+            if (from.HasValue && to.HasValue && from >= to)
+                return BadRequest("'from' must be before 'to'.");
+
+            var rentals = await _rentalService.GetRentalsAsync(userId, carId, from, to);
+            return rentals;
+        }
+
+        // GET: api/rentals/5
+        [HttpGet("{id}")]
+        public async Task<ActionResult<RentalDetailDto>> GetRental(int id)
+        {
+            var rental = await _rentalService.GetRentalAsync(id);
+            if (rental == null)
+                return NotFound();
+
+            return rental;
         }
 
         [HttpPost]
